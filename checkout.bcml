@@ -11,9 +11,10 @@
    <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
       <link href="style.css" rel="stylesheet">
-   
+   <script src="https://cdn.bizstore.io/bizapp-0.0.2.min.js"></script>
+
   </head>
-  <body>
+  <body onload="get_product_detail();">
  
       <div class="container pg_2">
       
@@ -26,8 +27,10 @@
                   
                      
                          
-                          <!-- <input type="hidden" class="form-control" name="qty" value="<?php echo $qty; ?>">
-                           <input type="hidden" class="form-control" name="package" value="<?php echo $id; ?>" > -->
+                           <input type="hidden" class="form-control" id="payable_amount" value="">
+                           <input type="hidden" class="form-control" id="package_name" value="" > 
+						    <input type="hidden" class="form-control" id="qty" value="">
+                           <input type="hidden" class="form-control" id="package_id" value="" > 
                           <div class="form-group">
                             Name:
                             <input type="text" class="form-control" id="name" name="name" >
@@ -69,7 +72,7 @@
               </div>
               
               <div class="col-md-2">
-              <input type="button" onclick="submit_button();" class="btn btn-success btn-block pg_2_btn" value="Order">
+              <input type="button" onclick="pay();" class="btn btn-success btn-block pg_2_btn" value="Pay">
               </div>
            
               </div>
@@ -115,6 +118,100 @@ function submit_button(){
         });
 
 }
+
+function pay(){
+
+	var payable_amount = $("#payable_amount").val();
+	var package_name = $("#package_name").val();
+	
+	var name = $("#name").val();
+	var email = $("#email").val();
+	var number = $("#number").val();
+	
+	
+		
+    var options = {
+     address: "yMzUo7mZQ8ZHAUhtoNQHZMJe8rTJZ3x1JR",
+      amount: payable_amount,  // 1 TRVC = 100,000,000
+      message: 'Package name: '+package_name+' Payable Amount: '+payable_amount+'Name:'+name+'email: '+email+'number:'+number,
+      identifier: "446f7261"
+    };
+
+    BizApp.payToWallet(options, function(error, result) {
+
+      if (error) {
+        $("#result").text("Payment failed: " + error);
+      }else{
+	  
+        
+		// Insert data in to Database 
+		
+		var qty = $("#qty").val();
+        var package_id = $("#package_id").val();
+        var name = $("#name").val();
+        var email = $("#email").val();
+        var number = $("#number").val();
+        var myJsonString = JSON.stringify(result);
+       var url_data = "http://mankiinfotech.com/ADMIN/admin_master/checkout_api";
+        $.ajax({
+          type: 'POST',
+          url: url_data,
+          //contentType: 'application/json; charset=utf-8',
+          data: {name:name,email:email,number:number,qty:qty,package:package_id,txn_id:myJsonString,is_order:1,amount_paid:result.amount},
+         // dataType: 'json',
+          success : function(data) {
+
+            window.location.href = "http://mankiinfotech.com/ADMIN/admin_master/thankyou";
+          }
+
+        });
+		
+		$("#result").text("Payment success: " + JSON.string-ify(result));
+		
+        // You can send to backend for verification
+       // $.post("https://demo.bizstore.io/api/verify",
+        //  { trxId: result.txId, toAddress: result.toAddress, amount: result.amount },
+          //function() { });
+       }
+    });
+  }
+
+function get_product_detail(){
+	
+	var url_string = window.location.href;
+        var url = new URL(url_string);
+        var qty = url.searchParams.get("qty");
+        var package_id = url.searchParams.get("id");
+		
+	 var url_data = "http://mankiinfotech.com/ADMIN/admin_master/get_package_detail";
+	 $.ajax({
+          type: 'POST',
+          url: url_data,
+          //contentType: 'application/json; charset=utf-8',
+          data: {package_id:package_id},
+         // dataType: 'json',
+          success : function(data) {
+				
+			var package_list = data.package_list;
+            var price  = package_list[0].price;
+			var package_name = package_list[0].package_name;
+			var payable_amount = qty * price * 100000000;
+			$("#payable_amount").val(payable_amount);
+			$("#package_name").val(package_name);
+			
+			$("#qty").val(qty);
+			$("#package_id").val(package_id);
+			 
+            //window.location.href = "http://mankiinfotech.com/ADMIN/admin_master/thankyou";
+          }
+
+        });
+
+}
+
+//get_product_detail();
+
+
 
     </script>
   </body>
