@@ -114,14 +114,74 @@
                   var package_name  = value.package_name;
                   var model_no = value.model_no;
                   
+                  var batch = value.batch;
+                  var start = value.batch_start;
+                  var end = value.batch_end;
+ //----------------------------------------------- FOR HIDE BUY BUTTON------------------------------------------
+
+                    var batch_ar = JSON.parse(batch);
+                    var start_ar = JSON.parse(start);
+                    var end_ar = JSON.parse(end);
+                    var is_display = false;
+
+                    var d = new Date();
+                    var month = d.getMonth()+1;
+                    var day = d.getDate();
+                    var dateCheck = (day<10 ? '0' : '') + day + '/' +
+                        (month<10 ? '0' : '') + month + '/' +
+                        d.getFullYear() ;
+
+                      //var dateCheck = "23/05/2018";
+
+                    //console.log(batch_ar.length);
+                    var batch_details = "";
+                    for (var i = 0; i <= batch_ar.length-1; i++) {
+
+                      //console.log(start_ar[i]);
+
+                      var batch_no = batch_ar[i];
+                      var start_date  = start_ar[i];
+                      var end_date = end_ar[i];
+
+                      var d1 = start_date.split("/");
+                      var d2 = end_date.split("/");
+                      var c = dateCheck.split("/");
+
+                      var from = new Date(d1[2], parseInt(d1[1])-1, d1[0]);  // -1 because months are from 0 to 11
+                      var to   = new Date(d2[2], parseInt(d2[1])-1, d2[0]-1);
+                      var check = new Date(c[2], parseInt(c[1])-1, c[0]);
+                      var is_true = check > from && check < to;
+
+                      if(dateCheck == end_date || dateCheck == start_date){
+                        is_true = true;
+                      }
+
+                      if(is_true){
+                        is_display = true;
+                      }
+
+                       batch_details += '<p>'+batch_no+'</p>'+
+                                        '<p>'+start_date+'-'+end_date+'</p>';
+
+                      
+                    }
+
+                  var style ="display:none";
+                  if(is_display){
+                    var style ="";
+                  }
+
+//------------------------------------ END HIDE BUTTON ---------------------------------------------------------------------
+
+
               html_package += '<div class="row">'+
                       '<div class="col-xs-10">'+
                         '<h5>'+package_name+'</h5>'+
                          '<p>'+model_no+'</p>'+
-                       
+                          batch_details+
                        '</div>'+
-                    '<div class="col-xs-2 mbtn"><a href="package_detail.bcml?id='+id+'" class="btn btn-success btn-block">BUY NOW</a>'+
-                        '<button type="button" class="btn btn-success btn-block">PREBOOK</button>'+
+                    '<div class="col-xs-2 mbtn"><a href="package_detail.bcml?id='+id+'" class="btn btn-success btn-block" style="'+style+'">BUY NOW</a>'+
+                        '<a href="package_detail.bcml?id='+id+'" class="btn btn-success btn-block">PREBOOK</a>'+
                         '<a href="package_review.bcml?id='+id+'" class="btn btn-success btn-block">REVIEW</a>'+
                         '</div>'+
                     '</div>'+
@@ -129,11 +189,6 @@
                   $("#package_list").html(html_package);
               });
 
-
-
-
-
-             
            }
         });
     
