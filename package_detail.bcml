@@ -85,15 +85,15 @@
                    </div>
                   </div>
                   <div class="row">
-                      <form action="" method="post" id="form_id">
+                      
                       <div class="col-md-3 col-sm-12" style="margin-bottom: 10px;">
                       <input type="text" class="btn btn-block btn-default" name="qty" placeholder="Quanity" onchange="add_qty(this.value);">
                       <input type="hidden" class="btn btn-block btn-default" name="package_id" id="package_id" value="">
                       </div>
                        <div class="col-md-3 col-sm-12">
-                      <input type="submit" class="btn btn-block btn-success" value="Buy Now">
+                      <a href="" id="buy_id" class="btn btn-block btn-success"> Buy Now</a>
                       </div>
-                      </form>
+                      
                   </div>
       
     
@@ -139,6 +139,7 @@
            $("#model_no").html(model_no);
            var url_img = "http://mankiinfotech.com/ADMIN/uploads/"+img;
             $(".img-fluid").attr('src',url_img);
+			//add_qty(0);
 
           }
 
@@ -149,8 +150,10 @@
 
         var package_id =  $("#package_id").val();
 
-        var action  = "checkout.bcml?qty="+qty+"&id="+package_id;
-        $("#form_id").attr('action',action);
+       // var link  = "checkout.bcml?qty="+qty+"&id="+package_id
+	       var link  = 'checkout.bcml?qty='+qty+'&id='+package_id+'';
+
+        $("#buy_id").attr('href',link);
 
       }
 
